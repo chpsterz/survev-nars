@@ -4,6 +4,7 @@ import { Cobalt } from "./maps/cobaltDefs";
 import { Deathmatch } from "./maps/deathmatchDefs";
 import { Desert } from "./maps/desertDefs";
 import { Faction } from "./maps/factionDefs";
+import { FixedLoot } from "./maps/fixedLootDefs";
 import { ForcedLoot } from "./maps/forcedLootDefs";
 import { ForcedLoot2 } from "./maps/forcedLootDefs2";
 import { Halloween } from "./maps/halloweenDefs";
@@ -58,6 +59,7 @@ export const MapDefs = {
     solos: SolosMap,
     forced_loot2: ForcedLoot2,
     mini_walls: MiniWalls,
+    fixed_loot: FixedLoot,
 } satisfies Record<string, MapDef>;
 
 export interface MapDef {
