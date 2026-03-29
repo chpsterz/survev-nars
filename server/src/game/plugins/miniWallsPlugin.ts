@@ -58,9 +58,9 @@ const ZONE_CLOSE_DURATION = 10; //(minutes) how long the zone takes to finally c
 // how long an obstacle waits after being destroyed before regrowing
 const OBSTACLE_REGROW_DELAY = 15;
 
-const PLAYABLE_WIDTH = 300;
-const PLAYABLE_HEIGHT = 120;
-const BED_DIST_FROM_WALL = 60; //might not actually be where the bed is, but just where its generating and stuff idk
+const PLAYABLE_WIDTH = 200;
+const PLAYABLE_HEIGHT = 100;
+const BED_DIST_FROM_WALL = 25; //might not actually be where the bed is, but just where its generating and stuff idk
 const BED_COVER_OFFSET = PLAYABLE_WIDTH / 2 - BED_DIST_FROM_WALL; //offset from center in the x axis
 const BED_OFFSET = BED_COVER_OFFSET - 10;
 
@@ -324,6 +324,9 @@ export default class MiniWallsPlugin extends GamePlugin {
             this.timerManager.setTimeout(() => {
                 this.breakBeds();
             }, AUTO_BED_BREAK_DELAY * 60);
+            for (const t of this.game.playerBarn.teams) {
+                t.isLastManApplied = true;
+            }
         });
 
         this.on("mapWillCreate", (event, ctx) => {
@@ -493,7 +496,6 @@ function giveGear(player: Player) {
         secondary,
         (GameObjectDefs[secondary] as GunDef).maxClip,
     );
-
     player.weaponManager.setWeapon(GameConfig.WeaponSlot.Melee, melee, 0);
 
     for (const nt of validNadeTypes) {
@@ -543,7 +545,7 @@ function getNewLoadout(): Loadout {
 }
 
 function getRespawnDelay(player: Player): number {
-    return 8;
+    return 5;
 }
 
 function bedBroken(bed: Bed, game: Game) {
@@ -633,38 +635,26 @@ function getRandomRifle(): string {
 
 function baseNadeType(): string {
     return util.weightedRandom([
-        { weight: 5, t: "" },
+        { weight: 2, t: "" },
         { weight: 3, t: "frag" },
-        { weight: 1, t: "impulse" },
-        { weight: 1, t: "mirv" },
+        { weight: 3, t: "impulse" },
+        { weight: 2, t: "mirv" },
     ]).t;
 }
 
 function baseMeleeType(): string {
     return util.weightedRandom([
-        { weight: 85, t: "" },
-        { weight: 3, t: "stonehammer" },
-        { weight: 5, t: "machete" },
+        { weight: 85, t: "fists" },
+        { weight: 0, t: "stonehammer" },
+        { weight: 0, t: "machete" },
         // {weight: 5, t: "impulse_gloves"},
-        { weight: 3, t: "hook" },
-        { weight: 3, t: "katana" },
-        { weight: 1, t: "naginata" },
+        { weight: 0, t: "hook" },
+        { weight: 0, t: "katana" },
+        { weight: 0, t: "naginata" },
     ]).t;
 }
 
 const loadouts = [
-    {
-        weight: 1,
-        loadout: {
-            primary: "sv98",
-            secondary: "sv98",
-            melee: baseMeleeType,
-            nadeType: baseNadeType,
-            nadeCount: 1,
-            chestLevel: 2,
-            helmetLevel: 2,
-        },
-    },
     {
         weight: 1,
         loadout: {
@@ -673,8 +663,8 @@ const loadouts = [
             melee: baseMeleeType,
             nadeType: baseNadeType,
             nadeCount: 1,
-            chestLevel: 2,
-            helmetLevel: 2,
+            chestLevel: 1,
+            helmetLevel: 1,
         },
     },
     {
@@ -686,7 +676,7 @@ const loadouts = [
             nadeType: baseNadeType,
             nadeCount: 1,
             chestLevel: 2,
-            helmetLevel: 3,
+            helmetLevel: 1,
         },
     },
     {
@@ -698,7 +688,7 @@ const loadouts = [
             nadeType: baseNadeType,
             nadeCount: 1,
             chestLevel: 2,
-            helmetLevel: 2,
+            helmetLevel: 1,
         },
     },
     {
@@ -722,18 +712,18 @@ const loadouts = [
             nadeType: baseNadeType,
             nadeCount: 1,
             chestLevel: 2,
-            helmetLevel: 3,
+            helmetLevel: 2,
         },
     },
     {
-        weight: 1,
+        weight: 0.5,
         loadout: {
             primary: "blr",
             secondary: "blr",
             melee: baseMeleeType,
             nadeType: baseNadeType,
-            nadeCount: 1,
-            chestLevel: 2,
+            nadeCount: 2,
+            chestLevel: 3,
             helmetLevel: 3,
         },
     },
@@ -762,14 +752,14 @@ const loadouts = [
         },
     },
     {
-        weight: 1,
+        weight: 0.5,
         loadout: {
             primary: "scout_elite",
             secondary: "scout_elite",
             melee: baseMeleeType,
             nadeType: baseNadeType,
-            nadeCount: 1,
-            chestLevel: 2,
+            nadeCount: 2,
+            chestLevel: 3,
             helmetLevel: 3,
         },
     },
@@ -836,25 +826,13 @@ const loadouts = [
     {
         weight: 1,
         loadout: {
-            primary: "spas12",
-            secondary: "model94",
-            melee: baseMeleeType,
-            nadeType: baseNadeType,
-            nadeCount: 1,
-            chestLevel: 3,
-            helmetLevel: 2,
-        },
-    },
-    {
-        weight: 1,
-        loadout: {
             primary: "m870",
             secondary: "model94",
             melee: baseMeleeType,
             nadeType: baseNadeType,
             nadeCount: 1,
             chestLevel: 3,
-            helmetLevel: 2,
+            helmetLevel: 3,
         },
     },
     {
@@ -866,7 +844,7 @@ const loadouts = [
             nadeType: baseNadeType,
             nadeCount: 1,
             chestLevel: 3,
-            helmetLevel: 2,
+            helmetLevel: 3,
         },
     },
     {
@@ -876,9 +854,9 @@ const loadouts = [
             secondary: "famas",
             melee: baseMeleeType,
             nadeType: "impulse",
-            nadeCount: 1,
-            chestLevel: 3,
-            helmetLevel: 2,
+            nadeCount: 2,
+            chestLevel: 4,
+            helmetLevel: 3,
         },
     },
     {
@@ -901,7 +879,7 @@ const loadouts = [
             melee: baseMeleeType,
             nadeType: baseNadeType,
             nadeCount: 1,
-            chestLevel: 2,
+            chestLevel: 3,
             helmetLevel: 3,
         },
     },
@@ -913,56 +891,56 @@ const loadouts = [
             melee: baseMeleeType,
             nadeType: "impulse",
             nadeCount: 1,
-            chestLevel: 3,
+            chestLevel: 4,
             helmetLevel: 3,
         },
     },
     {
-        weight: 3,
+        weight: 1,
         loadout: {
             primary: "sv98",
             secondary: getRandomRifle,
             melee: baseMeleeType,
             nadeType: "impulse",
             nadeCount: 1,
-            chestLevel: 3,
-            helmetLevel: 3,
+            chestLevel: 2,
+            helmetLevel: 2,
         },
     },
     {
-        weight: 3,
+        weight: 1,
         loadout: {
             primary: "spas12",
             secondary: getRandomRifle,
             melee: baseMeleeType,
             nadeType: "impulse",
-            nadeCount: 1,
-            chestLevel: 3,
+            nadeCount: 2,
+            chestLevel: 4,
             helmetLevel: 3,
         },
     },
     {
-        weight: 3,
+        weight: 1,
         loadout: {
             primary: "m870",
             secondary: getRandomRifle,
             melee: baseMeleeType,
             nadeType: "impulse",
             nadeCount: 2,
-            chestLevel: 3,
+            chestLevel: 4,
             helmetLevel: 3,
         },
     },
     {
         weight: 1,
         loadout: {
-            primary: "spas12",
-            secondary: "saiga",
+            primary: "m870",
+            secondary: "mac10",
             melee: baseMeleeType,
             nadeType: "impulse",
-            nadeCount: 1,
-            chestLevel: 2,
-            helmetLevel: 3,
+            nadeCount: 2,
+            chestLevel: 4,
+            helmetLevel: 4,
         },
     },
 ];

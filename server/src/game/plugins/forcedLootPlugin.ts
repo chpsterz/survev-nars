@@ -32,8 +32,6 @@ interface Loadout {
     melee: string;
     role: string;
 }
-const MIN_NUM_ROLES_TO_NOT_NAME_PLAYERS = 2;
-
 //raise above 0.5 to artifically boost the strength of most non sniper/shotgun loadouts, vice versa also applies
 //added only because tweaking this is easier than going through the whole strength function if you want to tweak strength distrubutions for role/armor distribution purposes
 const BETTER_STRENGTH_WEIGHT = 0.5;
@@ -67,7 +65,7 @@ const roleWeights = [
 const secondaryWeights = [
     { weight: 1, gun: "sv98" },
     { weight: 3, gun: "mosin" },
-    { weight: 2, gun: "model94" },
+    { weight: 3, gun: "model94" },
     { weight: 2, gun: "scout_elite" },
     { weight: 4, gun: "blr" },
     { weight: 0.3, gun: "pkp" },
@@ -80,14 +78,14 @@ const secondaryWeights = [
     { weight: 1, gun: "ak47" },
     { weight: 1, gun: "hk416" },
     { weight: 1, gun: "scar" },
-    { weight: 1, gun: "garand" },
+    { weight: 2, gun: "garand" },
     // { weight: 1, gun: "m1014" },
     { weight: 0.5, gun: "mk12" },
-    { weight: 0.5, gun: "m39" },
+    // { weight: 0.5, gun: "m39" },
 
     { weight: 0.8, gun: "deagle_dual" },
     { weight: 0.3, gun: "saiga" },
-    { weight: 1.5, gun: "famas" },
+    { weight: 3, gun: "famas" },
     { weight: 1.5, gun: "an94" },
     { weight: 0.5, gun: "p30l_dual" },
     { weight: 0.001, gun: "awc" },
@@ -250,6 +248,7 @@ function generateFairLootLoadouts(): Loadout[] {
 }
 
 function givePlayerFairLootLoadout(player: Player, loadout: Loadout) {
+    const oldMelee = player.weapons[2].type;
     switch (loadout.role) {
         case "medic": {
             player.promoteToRole("medic");
@@ -284,6 +283,9 @@ function givePlayerFairLootLoadout(player: Player, loadout: Loadout) {
         (GameObjectDefs[loadout.secondary] as GunDef).maxClip,
     );
     player.weaponManager.setWeapon(GameConfig.WeaponSlot.Melee, loadout.melee, 0);
+    if (player.weaponManager.weapons[2].type == "fists") {
+        player.weaponManager.setWeapon(GameConfig.WeaponSlot.Melee, oldMelee, 0);
+    }
 
     player.inventory["2xscope"] = 1;
     player.inventory["4xscope"] = 1;
@@ -347,7 +349,7 @@ function giveEveryoneFairLoot(game: Game) {
             roleCount += 1;
         }
     }
-    if (roleCount < MIN_NUM_ROLES_TO_NOT_NAME_PLAYERS) {
+    if (roleCount !== 3) {
         listSquadNames(game);
     }
 }
@@ -431,13 +433,13 @@ function getUpgradedGun(g: string): string {
             return "spas12";
         }
         case "m1014":
+        case "garand":
         case "mosin": {
             if (Math.random() < 0.3) return "sv98";
             break;
         }
         case "blr":
         case "model94":
-        case "garand":
         case "scout_elite": {
             if (Math.random() < 0.5) return "mosin";
             break;
@@ -463,6 +465,7 @@ function getUpgradedGun(g: string): string {
         case "p30l_dual":
         case "m4a1":
         case "scorpion":
+        case "scar":
         case "grozas": {
             if (Math.random() < 0.7) return util.weightedRandom(gt.goodSprays).gun;
             break;
@@ -470,7 +473,6 @@ function getUpgradedGun(g: string): string {
         case "vector":
         case "ak47":
         case "hk416":
-        case "scar":
         case "dp28": {
             return util.weightedRandom(gt.decentSprays).gun;
         }
@@ -702,7 +704,7 @@ const gt = {
         { weight: 1, gun: "hk416" },
         { weight: 1, gun: "scar" },
         { weight: 0.5, gun: "mk12" },
-        { weight: 0.5, gun: "m39" },
+        // { weight: 0.5, gun: "m39" },
         { weight: 0.8, gun: "deagle_dual" },
         { weight: 2, gun: "famas" },
         { weight: 2, gun: "an94" },
@@ -742,13 +744,13 @@ export default class focedLootPlugin extends GamePlugin {
             (dmg: number, n: number, stage: number) => dmg * (1 + Math.min(n, 40) / 20),
         );
         attachMovingGas(this, {
-            firstMovingZone: 4,
-            stationaryZoneRadiusMultiplier: 0.55,
-            movingZoneRadiusMultiplier: 0.7,
+            firstMovingZone: 3,
+            stationaryZoneRadiusMultiplier: 0.6,
+            movingZoneRadiusMultiplier: 0.75,
             damages: [3, 4, 6, 7, 10],
-            initWaitTime: 60,
-            minWaitTime: 20,
-            waitTimeDecrement: 15,
+            initWaitTime: 40,
+            minWaitTime: 15,
+            waitTimeDecrement: 10,
             initMovingTime: 25,
             minMovingTime: 15,
             movingTimeDecrement: 5,
