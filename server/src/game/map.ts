@@ -6,7 +6,7 @@ import type {
     ObstacleDef,
     StructureDef,
 } from "../../../shared/defs/mapObjectsTyping";
-import type { MapId } from "../../../shared/defs/types/misc";
+import { MapId } from "../../../shared/defs/types/misc";
 import { GameConfig, TeamMode } from "../../../shared/gameConfig";
 import * as net from "../../../shared/net/net";
 import { MsgStream, MsgType } from "../../../shared/net/net";
@@ -975,6 +975,19 @@ export class GameMap {
 
         this.clampToMapBounds(pos);
 
+        if (this.mapId == MapId.FixedLoot && pos.x < this.center.x - 24 && parentId === undefined) {
+            this.genAuto(type,
+                v2.create(this.width - pos.x, this.height - pos.y),
+                layer,
+                ori === undefined ? 0 : ori < 2 ? ori + 2 : ori - 2,
+                scale,
+                parentId,
+                puzzlePiece,
+                ignoreMapSpawnReplacement,
+                hideFromMap
+            );
+        }
+
         switch (def.type) {
             case "obstacle":
                 return this.genObstacle(
@@ -1058,6 +1071,11 @@ export class GameMap {
         const def = MapObjectDefs[type];
 
         const rot = math.oriToRad(ori);
+
+        if (this.mapId == MapId.FixedLoot) {
+            const centerWidth = 24;
+            pos.x = pos.x < this.center.x - centerWidth ? pos.x : pos.x - this.center.x - centerWidth;
+        }
 
         if (!def.terrain?.river && !def.terrain?.waterEdge) {
             const mapBound = def.terrain?.beach ? this.beachBounds : this.grassBounds;
